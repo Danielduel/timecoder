@@ -1,24 +1,43 @@
 import { randomUUID } from "crypto";
 import { type NextApiHandler } from "next";
+import { z } from "zod";
 
-const subEventV0Push: NextApiHandler = (req, res) => {
-  if (!req.headers.authorization)
-    return res
-      .status(401)
-      .send("Please authorize this request (no authorization header)");
+import { requireIntegrationV0 } from "@acme/api/src/utils/v0/integration";
+import { getNewOrContinueSessionV0 } from "@acme/api/src/utils/v0/session";
 
-  const [authVersion = "", authToken = ""] = (
-    req.headers.authorization ?? ""
-  ).split(" ");
+const newEventAndNewSubEventInput = z.object({
+  session: z.object({
+    id: z.string().min(1),
+  }),
+  event: z.object({
+    name: z.string().min(1),
+    data: z.any(),
+  }),
+  subEvent: z.object({
+    name: z.string().min(1),
+    data: z.object({}),
+  }),
+});
 
-  const hasAuth = authVersion === "IntegrationV0";
-  if (!hasAuth)
-    return res
-      .status(401)
-      .send("Invalid authorization protocol (expected `IntegrationV0`)");
+const existingEventAndNewSubEventInput = z.object({
+  session: z.object({
+    id: z.string().min(1),
+  }),
+  event: z.object({
+    id: z.string().min(1),
+  }),
+  subEvent: z.object({
+    name: z.string().min(1),
+    data: z.object({}),
+  }),
+});
 
-  const hasValidAuth = authToken === "mocktoken";
-  if (!hasValidAuth) return res.status(401).send("Invalid authorization token");
+const subEventV0Push: NextApiHandler = async (req, res) => {
+  const integration = await requireIntegrationV0(req, res);
+  if (!integration) return res;
+
+  const session = await getNewOrContinueSessionV0(integration);
+  const { name } = integration.user;
 
   const placeholder = {
     event: {
