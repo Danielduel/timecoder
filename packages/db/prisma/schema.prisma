@@ -10,12 +10,74 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model SubEventV0 {
+    id                String            @id @default(cuid())
+
+    data      Json
+    name      String
+
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
+
+    ownerId           String
+    owner             User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    createdById       String
+    createdBy         IntegrationV0     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+    parentId          String
+    parent            EventV0           @relation(fields: [parentId], references: [id], onDelete: Cascade)
+}
+
+model EventV0 {
+    id                String            @id @default(cuid())
+
+    data              Json
+    name              String
+
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
+
+    ownerId           String
+    owner             User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    createdById       String
+    createdBy         IntegrationV0     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+    parentId          String
+    parent            SessionV0         @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+    children          SubEventV0[]
+}
+
+model SessionV0 {
+    id                String            @id @default(cuid())
+
+    title             String            @default("")
+    description       String            @default("")
+    published         Boolean           @default(false)
+
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
+
+    ownerId           String
+    owner             User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    createdById     String
+    createdBy         IntegrationV0     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+    children          EventV0[]
+}
+
 model IntegrationV0 {
     id                String  @id @default(cuid())
     userId            String
     token             String  @unique @default(uuid())
     
+    createdAt         DateTime          @default(now())
+    updatedAt         DateTime          @updatedAt
+
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    sessionsV0        SessionV0[]
+    eventsV0          EventV0[]
+    subEventsV0       SubEventV0[]
 }
 
 // NextAuth.js Models
@@ -56,7 +118,11 @@ model User {
     image               String?
     accounts            Account[]
     sessions            Session[]
+
     integrationsV0      IntegrationV0[]
+    sessionsV0          SessionV0[]
+    eventsV0            EventV0[]
+    subEventsV0         SubEventV0[]
 }
 
 model VerificationToken {

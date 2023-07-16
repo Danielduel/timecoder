@@ -28,13 +28,30 @@ export default Home;
 
 function AuthShowcase() {
   const { data: session } = api.auth.getSession.useQuery();
+  const { data: integration } = api.integrationV0.getIntegration.useQuery(
+    undefined,
+    { enabled: !!session },
+  );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex w-full max-w-prose flex-col items-center justify-center gap-4">
       {session?.user && (
         <p className="text-center text-2xl text-white">
           {session && <span>Logged in as {session?.user?.name}</span>}
         </p>
+      )}
+      {integration?.token && (
+        <code className="text w-full text-white">
+          <span>Integration version</span>&nbsp;
+          <span className="rounded bg-gray-100 p-1 text-gray-800">
+            IntegrationV0
+          </span>
+          <br />
+          <span>Integration token</span>&nbsp;
+          <span className="rounded bg-gray-100 p-1 text-gray-800">
+            {integration.token}
+          </span>
+        </code>
       )}
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"

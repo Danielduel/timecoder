@@ -1,33 +1,20 @@
-import { randomUUID } from "crypto";
 import { type NextApiHandler } from "next";
+import { requireIntegrationV0 } from "@acme/api/src/utils/v0/integration";
+import { getNewOrContinueSessionV0 } from "@acme/api/src/utils/v0/session";
 
-const integrationV0Me: NextApiHandler = (req, res) => {
-  if (!req.headers.authorization)
-    return res.status(401).send("Please authorize this request (no authorization header)");
+const integrationV0Me: NextApiHandler = async (req, res) => {
+  const integration = await requireIntegrationV0(req, res);
+  if (!integration) return res;
 
-  const [authVersion = "", authToken = ""] = (
-    req.headers.authorization ?? ""
-  ).split(" ");
+  const session = await getNewOrContinueSessionV0(integration);
+  const { name } = integration.user;
 
-  const hasAuth = authVersion === "IntegrationV0";
-  if (!hasAuth)
-    return res
-      .status(401)
-      .send("Invalid authorization protocol (expected `IntegrationV0`)");
-
-  const hasValidAuth = authToken === "mocktoken";
-  if (!hasValidAuth) return res.status(401).send("Invalid authorization token");
-
-  const placeholder = {
-    session: {
-      uuid: randomUUID(),
-      timeStart: Date.now(),
-    },
+  return res.status(200).json({
+    session,
     user: {
-      name: "Test",
+      name,
     },
-  };
-  return res.status(200).json(placeholder);
+  });
 };
 
 export default integrationV0Me;
