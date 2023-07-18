@@ -10,11 +10,11 @@ const newEventAndNewSubEventInput = z.object({
   }),
   event: z.object({
     name: z.string().min(1),
-    data: z.object({}),
+    data: z.object({}).passthrough(),
   }),
   subEvent: z.object({
     name: z.string().min(1),
-    data: z.object({}),
+    data: z.object({}).passthrough(),
   }),
 });
 
@@ -27,7 +27,7 @@ const existingEventAndNewSubEventInput = z.object({
   }),
   subEvent: z.object({
     name: z.string().min(1),
-    data: z.object({}),
+    data: z.object({}).passthrough(),
   }),
 });
 
