@@ -10,6 +10,9 @@ export const sessionV0Router = createTRPCRouter({
       },
       select: {
         sessionsV0: {
+          orderBy: {
+            createdAt: "desc"
+          },
           select: {
             id: true,
             title: true,
@@ -19,6 +22,9 @@ export const sessionV0Router = createTRPCRouter({
             published: true,
 
             children: {
+              orderBy: {
+                createdAt: "asc"
+              },
               select: {
                 id: true,
                 name: true,

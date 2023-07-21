@@ -1,13 +1,30 @@
+/* eslint-disable react/display-name */
 import { type FC } from "react";
 
 type DataComponent = { data: any };
 const CodeBlockFallback: FC<DataComponent> = ({ data }) => {
   return (
-    <code className="block max-w-lg break-words bg-black">
-      {JSON.stringify(data)}
-    </code>
+    <pre className="max-w-min overflow-scroll break-words bg-zinc-900 p-2">
+      {JSON.stringify(data, null, 2)}
+    </pre>
   );
 };
+const CodeBlockFallbackWithError =
+  (args: EventToComponentMapperT): FC<DataComponent> =>
+  ({ data }) => {
+    return (
+      <div className="ml-2 border-l-2 border-red-400 py-3 pl-2">
+        <div>
+          Mapping failed for
+          <CodeBlockFallback data={args} />
+        </div>
+        <div>
+          Event data
+          <CodeBlockFallback data={data} />
+        </div>
+      </div>
+    );
+  };
 
 type EventToComponentMapperT = {
   integrationVersion: "V0";
@@ -17,12 +34,8 @@ type EventToComponentMapperT = {
   subEventName?: string;
 };
 
-export const EventToComponentMapper = ({
-  integrationVersion,
-  eventName,
-  subEventName,
-  schema,
-  source,
-}: EventToComponentMapperT): FC<DataComponent> => {
-  return CodeBlockFallback;
+export const EventToComponentMapper = (
+  args: EventToComponentMapperT,
+): FC<DataComponent> => {
+  return CodeBlockFallbackWithError(args);
 };
