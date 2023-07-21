@@ -1,5 +1,4 @@
-import { protectedProcedure } from "../../../trpc";
-import { createTRPCRouter } from "../../../trpc";
+import { protectedProcedure, createTRPCRouter } from "../../../trpc";
 
 export const integrationV0Router = createTRPCRouter({
   getIntegration: protectedProcedure.query(async ({ ctx }) => {
